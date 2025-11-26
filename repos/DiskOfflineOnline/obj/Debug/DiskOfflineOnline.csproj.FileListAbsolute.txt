@@ -15,3 +15,4 @@ C:\Users\hyper\Desktop\repos\DiskOfflineOnline\obj\Debug\DiskOfflineOnline.Prope
 C:\Users\hyper\Desktop\repos\DiskOfflineOnline\obj\Debug\DiskOfflineOnline.csproj.GenerateResource.cache
 C:\Users\hyper\Desktop\repos\DiskOfflineOnline\obj\Debug\DiskOfflineOnline.exe
 C:\Users\hyper\Desktop\repos\DiskOfflineOnline\obj\Debug\DiskOfflineOnline.pdb
+C:\Users\test\source\repos\DiskOfflineOnline\DiskOfflineOnline\obj\Debug\DiskOfflineOnline.csprojAssemblyReference.cache

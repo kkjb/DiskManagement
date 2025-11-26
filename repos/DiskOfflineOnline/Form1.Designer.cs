@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             this.listBoxDisks = new System.Windows.Forms.ListBox();
             this.buttonOffline = new System.Windows.Forms.Button();
             this.buttonOnline = new System.Windows.Forms.Button();
@@ -36,61 +37,50 @@
             // 
             // listBoxDisks
             // 
-            this.listBoxDisks.Font = new System.Drawing.Font("Arial", 15F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.listBoxDisks.BackColor = System.Drawing.SystemColors.WindowText;
+            resources.ApplyResources(this.listBoxDisks, "listBoxDisks");
+            this.listBoxDisks.ForeColor = System.Drawing.Color.Lime;
             this.listBoxDisks.FormattingEnabled = true;
-            this.listBoxDisks.ItemHeight = 45;
-            this.listBoxDisks.Location = new System.Drawing.Point(34, 34);
             this.listBoxDisks.Name = "listBoxDisks";
-            this.listBoxDisks.Size = new System.Drawing.Size(1132, 724);
-            this.listBoxDisks.TabIndex = 0;
             // 
             // buttonOffline
             // 
-            this.buttonOffline.Font = new System.Drawing.Font("Arial Black", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.buttonOffline.BackColor = System.Drawing.SystemColors.ActiveCaption;
+            this.buttonOffline.FlatAppearance.BorderSize = 0;
+            resources.ApplyResources(this.buttonOffline, "buttonOffline");
             this.buttonOffline.ForeColor = System.Drawing.Color.Red;
-            this.buttonOffline.Location = new System.Drawing.Point(1219, 34);
             this.buttonOffline.Name = "buttonOffline";
-            this.buttonOffline.Size = new System.Drawing.Size(296, 103);
-            this.buttonOffline.TabIndex = 1;
-            this.buttonOffline.Text = "OFFLINE";
-            this.buttonOffline.UseVisualStyleBackColor = true;
+            this.buttonOffline.UseVisualStyleBackColor = false;
             this.buttonOffline.Click += new System.EventHandler(this.buttonOffline_Click);
             // 
             // buttonOnline
             // 
-            this.buttonOnline.Font = new System.Drawing.Font("Arial Black", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.buttonOnline.ForeColor = System.Drawing.Color.Green;
-            this.buttonOnline.Location = new System.Drawing.Point(1219, 655);
+            this.buttonOnline.BackColor = System.Drawing.SystemColors.ActiveCaption;
+            resources.ApplyResources(this.buttonOnline, "buttonOnline");
+            this.buttonOnline.ForeColor = System.Drawing.Color.Lime;
             this.buttonOnline.Name = "buttonOnline";
-            this.buttonOnline.Size = new System.Drawing.Size(296, 103);
-            this.buttonOnline.TabIndex = 2;
-            this.buttonOnline.Text = "ONLINE";
-            this.buttonOnline.UseVisualStyleBackColor = true;
+            this.buttonOnline.UseVisualStyleBackColor = false;
             this.buttonOnline.Click += new System.EventHandler(this.buttonOnline_Click);
             // 
             // buttonRefresh
             // 
-            this.buttonRefresh.Font = new System.Drawing.Font("Arial Black", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.buttonRefresh.BackColor = System.Drawing.SystemColors.ActiveCaption;
+            resources.ApplyResources(this.buttonRefresh, "buttonRefresh");
             this.buttonRefresh.ForeColor = System.Drawing.Color.Blue;
-            this.buttonRefresh.Location = new System.Drawing.Point(1219, 332);
-            this.buttonRefresh.Name = "Refresh";
-            this.buttonRefresh.Size = new System.Drawing.Size(296, 103);
-            this.buttonRefresh.TabIndex = 3;
-            this.buttonRefresh.Text = "Refresh";
-            this.buttonRefresh.UseVisualStyleBackColor = true;
+            this.buttonRefresh.Name = "buttonRefresh";
+            this.buttonRefresh.UseVisualStyleBackColor = false;
             this.buttonRefresh.Click += new System.EventHandler(this.Form1_Load);
             // 
             // Form1
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(12F, 24F);
+            resources.ApplyResources(this, "$this");
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1552, 811);
+            this.BackColor = System.Drawing.SystemColors.WindowFrame;
             this.Controls.Add(this.buttonRefresh);
             this.Controls.Add(this.buttonOnline);
             this.Controls.Add(this.buttonOffline);
             this.Controls.Add(this.listBoxDisks);
             this.Name = "Form1";
-            this.Text = "DiskHotplug";
             this.Load += new System.EventHandler(this.Form1_Load);
             this.ResumeLayout(false);
 

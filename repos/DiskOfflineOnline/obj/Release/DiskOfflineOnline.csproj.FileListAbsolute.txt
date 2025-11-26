@@ -1,0 +1,9 @@
+C:\Users\test\source\repos\DiskOfflineOnline\DiskOfflineOnline\bin\Release\DiskOfflineOnline.exe.config
+C:\Users\test\source\repos\DiskOfflineOnline\DiskOfflineOnline\bin\Release\DiskOfflineOnline.exe
+C:\Users\test\source\repos\DiskOfflineOnline\DiskOfflineOnline\bin\Release\DiskOfflineOnline.pdb
+C:\Users\test\source\repos\DiskOfflineOnline\DiskOfflineOnline\obj\Release\DiskOfflineOnline.csprojAssemblyReference.cache
+C:\Users\test\source\repos\DiskOfflineOnline\DiskOfflineOnline\obj\Release\DiskOfflineOnline.Form1.resources
+C:\Users\test\source\repos\DiskOfflineOnline\DiskOfflineOnline\obj\Release\DiskOfflineOnline.Properties.Resources.resources
+C:\Users\test\source\repos\DiskOfflineOnline\DiskOfflineOnline\obj\Release\DiskOfflineOnline.csproj.GenerateResource.cache
+C:\Users\test\source\repos\DiskOfflineOnline\DiskOfflineOnline\obj\Release\DiskOfflineOnline.exe
+C:\Users\test\source\repos\DiskOfflineOnline\DiskOfflineOnline\obj\Release\DiskOfflineOnline.pdb
