@@ -3,8 +3,8 @@ using System.Diagnostics;
 using System.Windows.Forms;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-
-
+using System.Collections.Generic;
+using System.Management;
 namespace DiskOfflineOnline
 {
     public partial class Form1 : Form
@@ -20,105 +20,96 @@ namespace DiskOfflineOnline
             LoadDisks();  // 调用 LoadDisks 方法，加载磁盘列表
         }
 
-        // 磁盘设备列表
+        /// <summary>
+        /// 异步加载磁盘列表
+        /// 结合 Win32_DiskDrive 和 MSFT_Disk 来获取磁盘状态（联机/离线）
+        /// </summary>
         private async void LoadDisks()
         {
-            listBoxDisks.Items.Clear();  // 清空 ListBox 中的现有项目
-
-            // 使用WMI查询所有磁盘
-            var searcher = new System.Management.ManagementObjectSearcher("SELECT * FROM Win32_DiskDrive");
-            var disks = searcher.Get();
-
-            if (disks.Count == 0)
-            {
-                MessageBox.Show("No disks found.");  // 如果没有找到磁盘，弹出提示
-            }
-
-            foreach (System.Management.ManagementObject disk in disks)
-            {
-                string diskId = disk["DeviceID"]?.ToString();  // 获取磁盘ID
-                string model = disk["Model"]?.ToString();     // 获取磁盘型号
-                string diskNumber = ExtractDiskNumber(diskId);
-                string status = await GetDiskStatusAsync(diskNumber);  // 异步获取磁盘状态
-
-                listBoxDisks.Items.Add($"{model} - {diskId} - {status}");  // 将磁盘添加到 ListBox 中
-            }
-        }
-
-
-        // 获取磁盘状态（联机/脱机）并使用异步执行 PowerShell 脚本
-        private async Task<string> GetDiskStatusAsync(string diskNumber)
-        {
-            string status = string.Empty;
-
-            // 使用 PowerShell 获取磁盘状态
-            string script = $"Get-Disk -Number {diskNumber} | Select-Object -ExpandProperty OperationalStatus";
-            string operationalStatus = await ExecutePowerShellScriptAndGetOutputAsync(script);
-
-            if (operationalStatus.Contains("Offline"))
-            {
-                status = "脱机";
-            }
-            else
-            {
-                status = "联机";
-            }
-
-            return status;
-        }
-
-        // 执行 PowerShell 脚本并异步获取输出
-        private async Task<string> ExecutePowerShellScriptAndGetOutputAsync(string script)
-        {
-            ProcessStartInfo processStartInfo = new ProcessStartInfo()
-            {
-                FileName = "powershell.exe",
-                Arguments = $"-Command \"{script}\"",
-                UseShellExecute = false,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                CreateNoWindow = true,
-                Verb = "runas"
-            };
+            listBoxDisks.Items.Clear();  // 清空 ListBox中的现有项目
 
             try
             {
-                using (Process process = Process.Start(processStartInfo))
-                {
-                    string output = await process.StandardOutput.ReadToEndAsync();  // 使用异步方式读取标准输出
-                    string error = await process.StandardError.ReadToEndAsync();    // 使用异步方式读取错误输出
-                    process.WaitForExit(); // 等待进程结束
+                // 1. 查询 Win32_DiskDrive（获取磁盘基本信息）
+                var win32Searcher = new ManagementObjectSearcher("SELECT * FROM Win32_DiskDrive");
+                var win32Disks = win32Searcher.Get();
 
-                    if (process.ExitCode != 0)
+                // 2. 查询 MSFT_Disk（获取硬盘在线/离线状态）
+                var msftSearcher = new ManagementObjectSearcher(@"root\Microsoft\Windows\Storage", "SELECT * FROM MSFT_Disk");
+                var msftDisks = msftSearcher.Get();
+
+                if (win32Disks.Count == 0)
+                {
+                    MessageBox.Show("未找到任何磁盘！");
+                    return;
+                }
+
+                // 3. 构建 MSFT_Disk 的字典，Key = Number，Value = IsOffline
+                var msftDict = new Dictionary<uint, bool>();
+                foreach (ManagementObject md in msftDisks)
+                {
+                    uint number = (uint)(md["Number"] ?? 0);
+                    bool isOffline = (bool)(md["IsOffline"] ?? false);
+                    msftDict[number] = isOffline;
+                }
+
+                // 4. 遍历 Win32_DiskDrive，按 Index 匹配 MSFT_Disk 获取 IsOffline
+                foreach (ManagementObject wd in win32Disks)
+                {
+                    uint index = (uint)(wd["Index"] ?? 0);
+                    string model = wd["Model"]?.ToString() ?? "未知型号";
+                    string deviceId = wd["DeviceID"]?.ToString() ?? "未知ID";
+
+                    // 根据 Index 查找 MSFT_Disk 的 IsOffline 状态
+                    string diskIsOffline = "未知";
+                    if (msftDict.ContainsKey(index))
                     {
-                        MessageBox.Show($"PowerShell 执行失败，退出码：{process.ExitCode}\n错误：{error}");
+                        diskIsOffline = msftDict[index] ? "离线" : "联机";
                     }
 
-                    return output.Trim();
+                    // 异步添加到 ListBox
+                    await Task.Run(() =>
+                    {
+                        this.Invoke(new Action(() =>
+                        {
+                            listBoxDisks.Items.Add($"{diskIsOffline} - {model} - {deviceId} - DISK {index}");
+                        }));
+                    });
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"操作失败: {ex.Message}");
-                return string.Empty;
+                MessageBox.Show($"加载磁盘失败: {ex.Message}");
             }
         }
 
-        private string ExtractDiskNumber(string deviceId)
+        /// <summary>
+        /// 从 ListBox 输出的字符串中提取磁盘编号（DISK 后面的数字）
+        /// 格式示例： "联机 - SHGP31-2000GM - \\.\PHYSICALDRIVE0 - DISK 0"
+        /// </summary>
+        /// <param name="line">ListBox 的一行文本</param>
+        /// <returns>磁盘编号，如果解析失败返回 -1</returns>
+        private int ExtractDiskNumber(string line)
         {
-            // 正则表达式匹配 \\.\PHYSICALDRIVEX 格式的字符串，X为磁盘编号
-            var match = Regex.Match(deviceId, @"\\\.\\PHYSICALDRIVE(\d+)");
-            if (match.Success)
-            {
-                return match.Groups[1].Value;  // 提取并返回磁盘编号
-            }
-            return string.Empty;  // 如果没有匹配，返回空字符串
+            if (string.IsNullOrEmpty(line))
+                return -1;
+
+            // 按 "- DISK" 分割
+            var parts = line.Split(new string[] { "- DISK" }, StringSplitOptions.None);
+            if (parts.Length != 2)
+                return -1;
+
+            // 去掉空格并尝试解析为整数
+            if (int.TryParse(parts[1].Trim(), out int diskNumber))
+                return diskNumber;
+
+            return -1;
         }
 
         // 刷新按钮事件
         private void Refresh_Click(object sender, EventArgs e)
         {
-
+            
             LoadDisks();  // 重新加载磁盘列表并刷新状态
         }
 
@@ -132,14 +123,14 @@ namespace DiskOfflineOnline
                 return;
             }
 
-            // 提取磁盘编号
-            string diskNumber = ExtractDiskNumber(selectedDisk);
-            MessageBox.Show($"准备脱机磁盘\r\n型号：{selectedDisk}\r\n磁盘编号 {diskNumber}");  // 调试信息，确认磁盘编号
+            // 提取 diskIndex
+            string diskIndex = ExtractDiskNumber(selectedDisk).ToString();
+            MessageBox.Show($"准备脱机磁盘\r\n型号：{selectedDisk}\r\n磁盘编号 {diskIndex}");  // 调试信息，确认磁盘编号
 
             // 调用 SetDiskOffline 执行磁盘脱机
-            SetDiskOffline(diskNumber);
+            SetDiskOffline(diskIndex); 
             // 执行完操作后刷新磁盘状态
-            LoadDisks();  // 重新加载磁盘列表并刷新状态
+            LoadDisks();  // 重新加载磁盘列表并刷新状态    
         }
 
         // 联机按钮事件
@@ -152,28 +143,27 @@ namespace DiskOfflineOnline
                 return;
             }
 
-            string diskNumber = ExtractDiskNumber(selectedDisk);
-            MessageBox.Show($"准备联机磁盘\r\n型号：{selectedDisk}\r\n磁盘编号 {diskNumber}");  // 调试信息，确认磁盘编号
-
+            string diskIndex = ExtractDiskNumber(selectedDisk).ToString();
+            MessageBox.Show($"准备联机磁盘\r\n型号：{selectedDisk}\r\n磁盘编号 {diskIndex}");  // 调试信息，确认磁盘编号
             // 调用 SetDiskOnline 执行磁盘联机
-            SetDiskOnline(diskNumber);
+            SetDiskOnline(diskIndex);   
             // 执行完操作后刷新磁盘状态
-            LoadDisks();  // 重新加载磁盘列表并刷新状态
+            LoadDisks();  // 重新加载磁盘列表并刷新状态    
         }
 
-        // 使用 PowerShell 脚本设置磁盘脱机
-        private void SetDiskOffline(string diskNumber)
+        // 使用 PowerShell 脚本设置磁盘脱机（根据 index 执行）
+        private void SetDiskOffline(string index)
         {
             try
             {
                 // PowerShell 脚本内容
-                string script = $"Get-Disk -Number {diskNumber} | Set-Disk -IsOffline $true";
+                string script = $"Get-Disk -Number {index} | Set-Disk -IsOffline $true";
 
                 // 执行 PowerShell 脚本
                 ExecutePowerShellScript(script);
 
                 // 提示用户磁盘已脱机
-                // MessageBox.Show($"磁盘 {diskNumber} 已成功脱机！");
+                // MessageBox.Show($"磁盘 {index} 已成功脱机！");
             }
             catch (Exception ex)
             {
@@ -182,18 +172,18 @@ namespace DiskOfflineOnline
         }
 
         // 使用 PowerShell 脚本设置磁盘联机
-        private void SetDiskOnline(string diskNumber)
+        private void SetDiskOnline(string index)
         {
             try
             {
                 // PowerShell 脚本内容
-                string script = $"Get-Disk -Number {diskNumber} | Set-Disk -IsOffline $false";
+                string script = $"Get-Disk -Number {index} | Set-Disk -IsOffline $false";
 
                 // 执行 PowerShell 脚本
                 ExecutePowerShellScript(script);
 
                 // 提示用户磁盘已联机
-                MessageBox.Show($"磁盘 {diskNumber} 已成功联机！");
+                // MessageBox.Show($"磁盘 {index} 已成功联机！");
             }
             catch (Exception ex)
             {

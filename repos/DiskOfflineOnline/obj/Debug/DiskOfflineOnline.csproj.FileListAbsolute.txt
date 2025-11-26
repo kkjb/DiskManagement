@@ -6,3 +6,12 @@ C:\Users\test\source\repos\DiskOfflineOnline\DiskOfflineOnline\obj\Debug\DiskOff
 C:\Users\test\source\repos\DiskOfflineOnline\DiskOfflineOnline\obj\Debug\DiskOfflineOnline.csproj.GenerateResource.cache
 C:\Users\test\source\repos\DiskOfflineOnline\DiskOfflineOnline\obj\Debug\DiskOfflineOnline.exe
 C:\Users\test\source\repos\DiskOfflineOnline\DiskOfflineOnline\obj\Debug\DiskOfflineOnline.pdb
+C:\Users\hyper\Desktop\repos\DiskOfflineOnline\bin\Debug\DiskOfflineOnline.exe.config
+C:\Users\hyper\Desktop\repos\DiskOfflineOnline\bin\Debug\DiskOfflineOnline.exe
+C:\Users\hyper\Desktop\repos\DiskOfflineOnline\bin\Debug\DiskOfflineOnline.pdb
+C:\Users\hyper\Desktop\repos\DiskOfflineOnline\obj\Debug\DiskOfflineOnline.csprojAssemblyReference.cache
+C:\Users\hyper\Desktop\repos\DiskOfflineOnline\obj\Debug\DiskOfflineOnline.Form1.resources
+C:\Users\hyper\Desktop\repos\DiskOfflineOnline\obj\Debug\DiskOfflineOnline.Properties.Resources.resources
+C:\Users\hyper\Desktop\repos\DiskOfflineOnline\obj\Debug\DiskOfflineOnline.csproj.GenerateResource.cache
+C:\Users\hyper\Desktop\repos\DiskOfflineOnline\obj\Debug\DiskOfflineOnline.exe
+C:\Users\hyper\Desktop\repos\DiskOfflineOnline\obj\Debug\DiskOfflineOnline.pdb
